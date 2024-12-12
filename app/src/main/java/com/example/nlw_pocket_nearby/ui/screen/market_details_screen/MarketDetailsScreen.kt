@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.LaunchedEffect
 
 // Busca de dados remotos
 import coil3.compose.AsyncImage
@@ -32,11 +33,20 @@ import com.example.nlw_pocket_nearby.data.model.mock.mockMarkets
 import com.example.nlw_pocket_nearby.ui.components.button.NearbyButton
 import com.example.nlw_pocket_nearby.ui.components.market_details.NearbyMarketDetailsCoupons
 import com.example.nlw_pocket_nearby.ui.components.market_details.NearbyMarketDetailsInfos
-// import com.example.nlw_pocket_nearby.ui.components.market_details.NearbyMarketDetailsRules
+import com.example.nlw_pocket_nearby.ui.components.market_details.NearbyMarketDetailsRules
 import com.example.nlw_pocket_nearby.ui.theme.Typography
 
 @Composable
-fun MarketDetailsScreen(modifier: Modifier = Modifier, market: Market, onNavigateBack: () -> Unit) {
+fun MarketDetailsScreen(
+    modifier: Modifier = Modifier,
+    uiState: MarketDetailsUiState,
+    onEvent: (MarketDetailsUiEvent) -> Unit,
+    onNavigateToQRCodeScanner: () -> Unit,
+    market: Market, onNavigateBack: () -> Unit
+) {
+    LaunchedEffect(true) {
+        onEvent(MarketDetailsUiEvent.OnFetchRules(marketId = market.id))
+    }
     Box(
         modifier = modifier.fillMaxSize()
     ) {
@@ -79,37 +89,47 @@ fun MarketDetailsScreen(modifier: Modifier = Modifier, market: Market, onNavigat
                             .fillMaxWidth()
                             .padding(vertical = 24.dp)
                     )
-//                    if (market.rules.isNotEmpty()) {
-//                        NearbyMarketDetailsRules(rules = market.rules)
-//                        HorizontalDivider(
-//                            modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)
-//                        )
-//                    }
-                    NearbyMarketDetailsCoupons(coupons = listOf("ABC12345"))
+                    if (!uiState.rules.isNullOrEmpty()) {
+                        NearbyMarketDetailsRules(rules = uiState.rules)
+                        HorizontalDivider(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 24.dp)
+                        )
+                    }
+                    if (!uiState.coupon.isNullOrEmpty())
+                        NearbyMarketDetailsCoupons(coupons = listOf(uiState.coupon))
                 }
-
-                NearbyButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 24.dp),
-                    text = "Ler QR Code",
-                    onClick = { }
-                )
+                NearbyMarketDetailsCoupons(coupons = listOf("ABC12345"))
             }
-        }
 
-        NearbyButton(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(24.dp),
-            iconRes = R.drawable.ic_arrow_left,
-            onClick = onNavigateBack
-        )
+            NearbyButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 24.dp),
+                text = "Ler QR Code",
+                onClick = onNavigateToQRCodeScanner
+            )
+        }
     }
+
+    NearbyButton(
+        modifier = Modifier
+           //.align(Alignment.TopStart) why is getting error? TODO
+            .padding(24.dp),
+        iconRes = R.drawable.ic_arrow_left,
+        onClick = onNavigateBack
+    )
 }
 
 @Preview
 @Composable
 private fun MarketDetailsScreenPreview() {
-    MarketDetailsScreen(market = mockMarkets.first(), onNavigateBack = {})
+    MarketDetailsScreen(
+        market = mockMarkets.first(),
+        uiState = MarketDetailsUiState(),
+        onEvent = {},
+        onNavigateToQRCodeScanner = {},
+        onNavigateBack = {}
+    )
 }

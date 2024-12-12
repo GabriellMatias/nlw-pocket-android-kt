@@ -3,6 +3,9 @@ package com.example.nlw_pocket_nearby.data.model
 import androidx.annotation.DrawableRes
 import com.example.nlw_pocket_nearby.R
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class NearbyCategoryFilterChipView(
     val description: String, @DrawableRes val icon: Int
 ) {
